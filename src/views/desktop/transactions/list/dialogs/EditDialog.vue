@@ -216,6 +216,11 @@
                                                                    :items="allVisibleCategorizedAccounts"
                                                                    v-model="transaction.sourceAccountId">
                                                 </two-column-select>
+                                                <div class="transaction-edit-account-balance text-caption text-medium-emphasis mt-1"
+                                                     v-if="sourceAccountBalance">
+                                                    <span>{{ tt('Account Balance') }}</span>
+                                                    <span class="text-primary ms-2">{{ sourceAccountBalance }}</span>
+                                                </div>
                                             </div>
                                         </template>
                                     </v-tooltip>
@@ -241,6 +246,11 @@
                                                                    :items="allVisibleCategorizedAccounts"
                                                                    v-model="transaction.destinationAccountId">
                                                 </two-column-select>
+                                                <div class="transaction-edit-account-balance text-caption text-medium-emphasis mt-1"
+                                                     v-if="destinationAccountBalance">
+                                                    <span>{{ tt('Account Balance') }}</span>
+                                                    <span class="text-primary ms-2">{{ destinationAccountBalance }}</span>
+                                                </div>
                                             </div>
                                         </template>
                                     </v-tooltip>
@@ -604,6 +614,8 @@ const {
     sourceAccountName,
     destinationAccountName,
     sourceAccountCurrency,
+    sourceAccountBalance,
+    destinationAccountBalance,
     destinationAccountCurrency,
     transactionDisplayTimezone,
     transactionTimezoneTimeDifference,
@@ -1174,6 +1186,10 @@ defineExpose({
 .transaction-edit-timezone.v-input input::placeholder {
     color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity)) !important;
     opacity: unset;
+}
+
+.transaction-edit-account-balance {
+    min-height: 20px;
 }
 
 .transaction-edit-map-view {

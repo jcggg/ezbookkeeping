@@ -38,6 +38,11 @@ import {
 import {
     getUnifiedSelectedAccountsCurrencyOrDefaultCurrency
 } from '@/lib/account.ts';
+import {
+    isNumber,
+    isObject,
+    isString
+} from '@/lib/common.ts';
 
 import {
     categoryTypeToTransactionType
@@ -191,6 +196,14 @@ export function useTransactionListPageBase() {
     const queryAllFilterAccountIdsCount = computed<number>(() => transactionsStore.allFilterAccountIdsCount);
     const queryAllFilterTagIdsCount = computed<number>(() => transactionsStore.allFilterTagIdsCount);
 
+    const currentAccountBalance = computed<string>(() => {
+        if (!query.value.accountIds || queryAllFilterAccountIdsCount.value !== 1) {
+            return '';
+        }
+
+        return getAccountBalance(allAccountsMap.value[query.value.accountIds]);
+    });
+
     const queryAccountName = computed<string>(() => {
         if (queryAllFilterAccountIdsCount.value > 1) {
             return tt('Multiple Accounts');
@@ -281,6 +294,32 @@ export function useTransactionListPageBase() {
 
         return true;
     });
+
+    function getAccountBalance(account?: Account): string {
+        if (!account) {
+            return '';
+        }
+
+        if (account.type === AccountType.SingleAccount.type) {
+            const balance = accountsStore.getAccountBalance(settingsStore.appSettings.showAccountBalance, account);
+
+            if (!isNumber(balance) && !isString(balance)) {
+                return '';
+            }
+
+            return formatAmountToLocalizedNumeralsWithCurrency(balance, account.currency);
+        } else if (account.type === AccountType.MultiSubAccounts.type) {
+            const balanceResult = accountsStore.getAccountSubAccountBalance(settingsStore.appSettings.showAccountBalance, false, account);
+
+            if (!isObject(balanceResult)) {
+                return '';
+            }
+
+            return formatAmountToLocalizedNumeralsWithCurrency(balanceResult.balance, balanceResult.currency);
+        }
+
+        return '';
+    }
 
     function hasSubCategoryInQuery(category: TransactionCategory): boolean {
         if (!category.subCategories || !category.subCategories.length) {
@@ -446,6 +485,7 @@ export function useTransactionListPageBase() {
         transactionCalendarMaxDate,
         currentMonthTransactionData,
         canAddTransaction,
+        currentAccountBalance,
         // functions
         hasSubCategoryInQuery,
         hasVisibleTagsInTagGroup,

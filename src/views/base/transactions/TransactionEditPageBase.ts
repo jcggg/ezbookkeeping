@@ -13,6 +13,7 @@ import { useExchangeRatesStore } from '@/stores/exchangeRates.ts';
 import type { NumeralSystem } from '@/core/numeral.ts';
 import type { WeekDayValue } from '@/core/datetime.ts';
 import type { LocalizedTimezoneInfo } from '@/core/timezone.ts';
+import { AccountType } from '@/core/account.ts';
 import { TransactionType, TransactionQuickAddButtonActionType } from '@/core/transaction.ts';
 import { TemplateType } from '@/core/template.ts';
 import { DISPLAY_HIDDEN_AMOUNT } from '@/consts/numeral.ts';
@@ -27,7 +28,10 @@ import { TransactionTemplate } from '@/models/transaction_template.ts';
 
 import {
     isArray,
-    isDefined
+    isDefined,
+    isNumber,
+    isObject,
+    isString
 } from '@/lib/common.ts';
 
 import {
@@ -303,6 +307,9 @@ export function useTransactionEditPageBase(type: TransactionEditPageType, initMo
         return defaultCurrency.value;
     });
 
+    const sourceAccountBalance = computed<string>(() => getAccountBalance(allAccountsMap.value[transaction.value.sourceAccountId]));
+    const destinationAccountBalance = computed<string>(() => getAccountBalance(allAccountsMap.value[transaction.value.destinationAccountId]));
+
     const transactionDisplayTimezone = computed<string>(() => {
         const utcOffset = numeralSystem.value.replaceWesternArabicDigitsToLocalizedDigits(getUtcOffsetByUtcOffsetMinutes(transaction.value.utcOffset));
         return `UTC${utcOffset}`;
@@ -445,6 +452,32 @@ export function useTransactionEditPageBase(type: TransactionEditPageType, initMo
         transaction.value.time = transaction.value.time - (transaction.value.utcOffset - oldUtcOffset) * 60;
     }
 
+    function getAccountBalance(account?: Account): string {
+        if (!account) {
+            return '';
+        }
+
+        if (account.type === AccountType.SingleAccount.type) {
+            const balance = accountsStore.getAccountBalance(showAccountBalance.value, account);
+
+            if (!isNumber(balance) && !isString(balance)) {
+                return '';
+            }
+
+            return formatAmountToLocalizedNumeralsWithCurrency(balance, account.currency);
+        } else if (account.type === AccountType.MultiSubAccounts.type) {
+            const balanceResult = accountsStore.getAccountSubAccountBalance(showAccountBalance.value, false, account);
+
+            if (!isObject(balanceResult)) {
+                return '';
+            }
+
+            return formatAmountToLocalizedNumeralsWithCurrency(balanceResult.balance, balanceResult.currency);
+        }
+
+        return '';
+    }
+
     function swapTransactionData(swapAccount: boolean, swapAmount: boolean): void {
         if (swapAccount) {
             const oldSourceAccountId = transaction.value.sourceAccountId;
@@ -558,6 +591,8 @@ export function useTransactionEditPageBase(type: TransactionEditPageType, initMo
         destinationAccountName,
         sourceAccountCurrency,
         destinationAccountCurrency,
+        sourceAccountBalance,
+        destinationAccountBalance,
         transactionDisplayTimezone,
         transactionTimezoneTimeDifference,
         geoLocationStatusInfo,

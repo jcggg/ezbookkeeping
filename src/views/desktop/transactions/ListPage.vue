@@ -134,6 +134,17 @@
                                     </template>
 
                                     <v-card-text class="pt-0">
+                                        <div class="transaction-list-account-balance d-flex align-start justify-space-between gap-4 mb-3"
+                                             v-if="currentAccountBalance">
+                                            <div class="transaction-list-account-balance-title text-truncate">
+                                                <span class="transaction-list-account-name">{{ queryAccountName }}</span>
+                                                <span class="mx-2">·</span>
+                                                <span>{{ tt('Account Balance') }}</span>
+                                            </div>
+                                            <div class="transaction-list-account-balance-amount text-primary">
+                                                {{ currentAccountBalance }}
+                                            </div>
+                                        </div>
                                         <div class="transaction-list-datetime-range d-flex align-center">
                                             <span class="text-body-1">{{ tt('Date Range') }}</span>
                                             <span class="text-body-1 transaction-list-datetime-range-text ms-2"
@@ -819,6 +830,7 @@ const {
     transactionCalendarMinDate,
     transactionCalendarMaxDate,
     currentMonthTransactionData,
+    currentAccountBalance,
     hasSubCategoryInQuery,
     hasVisibleTagsInTagGroup,
     isSameAsDefaultTimezoneOffsetMinutes,
@@ -1779,6 +1791,45 @@ init(props);
 
 .transaction-list-datetime-range .transaction-list-datetime-range-text {
     color: rgba(var(--v-theme-on-background), var(--v-medium-emphasis-opacity)) !important;
+}
+
+.transaction-list-account-balance {
+    min-height: 64px;
+    padding: 12px 16px;
+    border: 1px solid rgba(var(--v-theme-primary), 0.22);
+    border-radius: 8px;
+    background-color: rgba(var(--v-theme-primary), 0.06);
+}
+
+.transaction-list-account-balance-title {
+    min-width: 0;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+.transaction-list-account-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+}
+
+.transaction-list-account-balance-amount {
+    flex-shrink: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+    .transaction-list-account-balance {
+        flex-direction: column;
+        gap: 4px !important;
+    }
+
+    .transaction-list-account-balance-amount {
+        font-size: 1.55rem;
+    }
 }
 
 .v-table.transaction-table > .v-table__wrapper > table {
