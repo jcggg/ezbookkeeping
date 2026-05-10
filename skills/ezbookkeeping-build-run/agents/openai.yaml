@@ -1,0 +1,4 @@
+interface:
+  display_name: "ezBookkeeping Build Run"
+  short_description: "Build and run ezBookkeeping with Docker"
+  default_prompt: "Use $ezbookkeeping-build-run to build the Docker image, run ezBookkeeping on localhost:9090, and verify the web UI."
